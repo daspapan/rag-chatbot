@@ -8,19 +8,26 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "bootstrap": "cdk bootstrap",
+    "synth": "cdk synth",
+    "lambda-build": "npm run test",
+    "deploy": "npm run lambda-build && cdk synth && cdk deploy --require-approval never --all --outputs-file ../cdk-outputs.json",
+    "destroy": "cdk destroy --require-approval never --all"
   },
   "devDependencies": {
+    "@types/git-branch": "^2.0.5",
     "@types/jest": "^29.5.14",
     "@types/node": "22.7.9",
+    "aws-cdk": "2.1029.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.5",
-    "aws-cdk": "2.1029.0",
     "ts-node": "^10.9.2",
     "typescript": "~5.6.3"
   },
   "dependencies": {
     "aws-cdk-lib": "2.213.0",
-    "constructs": "^10.0.0"
+    "constructs": "^10.0.0",
+    "git-branch": "^2.0.1"
   }
 }
