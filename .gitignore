@@ -42,3 +42,4 @@ next-env.d.ts
 server
 *.bak
 cdk-outputs.json
+cdk.context.json
