@@ -3,7 +3,7 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import * as gitBranch from 'git-branch';
 import { CDKContext } from '../types';
-import { KnowledgeBaseStack } from '../lib/kb-stack';
+import { KnowledgeBaseStack } from '../lib/init-stack';
 
 
 const app = new cdk.App();

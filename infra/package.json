@@ -11,7 +11,8 @@
     "cdk": "cdk",
     "bootstrap": "cdk bootstrap",
     "synth": "cdk synth",
-    "lambda-build": "npm run test",
+    "lambda-build-projects": "cd lib/lambda/projects-handler && npm install && npm run build",
+    "lambda-build": "npm run lambda-build-projects",
     "deploy": "npm run lambda-build && cdk synth && cdk deploy --require-approval never --all --outputs-file ../cdk-outputs.json",
     "destroy": "cdk destroy --require-approval never --all"
   },

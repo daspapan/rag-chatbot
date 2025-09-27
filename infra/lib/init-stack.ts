@@ -1,12 +1,17 @@
 import * as cdk from 'aws-cdk-lib';
 import * as s3 from 'aws-cdk-lib/aws-s3'
-import * as iam from 'aws-cdk-lib/aws-iam'
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as path from 'path';
+import * as logs from 'aws-cdk-lib/aws-logs';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import { Construct } from 'constructs';
 import { CDKContext } from '../types';
 import { CreateKBStack } from './create-kb-stack';
+import { LambdaStack } from './lambda-stack';
+import { ApiGwStack } from './apigw-stack';
 
 
 interface KnowledgeBaseStackProps extends cdk.StackProps {
@@ -183,7 +188,7 @@ export class KnowledgeBaseStack extends cdk.Stack {
         userFilesBucket.addCorsRule({
             allowedMethods: [s3.HttpMethods.PUT, s3.HttpMethods.GET],
             allowedOrigins: enableLocalhost
-                ? [`https://${distribution.distributionDomainName}`, 'http://localhost:3000']
+                ? [`https://${distribution.distributionDomainName}`, 'http://localhost:8000']
                 : [`https://${distribution.distributionDomainName}`],
             allowedHeaders: ['*'],
             maxAge: 3000
@@ -275,7 +280,7 @@ export class KnowledgeBaseStack extends cdk.Stack {
 
 
         // Create the OpenSearch and Knowledge Base resources
-        const createKbStack = new CreateKBStack(
+        const knowledgeBaseStack = new CreateKBStack(
             this, 
             `${appName}-OpenSearchKBStack`, 
             {
@@ -283,6 +288,48 @@ export class KnowledgeBaseStack extends cdk.Stack {
             },
             context
         );
+
+        
+
+
+        const allowHeaders = enableLocalhost
+            ? 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Origin'
+            : 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token';
+
+        const allowOrigins = enableLocalhost
+            ? `https://${distribution.distributionDomainName},http://localhost:8000`
+            : `https://${distribution.distributionDomainName}`;
+
+
+        
+        const lambdaStack = new LambdaStack(
+            this, 
+            `${appName}-LambdaStack`, 
+            {
+                projectsTable, 
+                projectFilesTable, 
+                userFilesBucket, 
+                knowledgeBase: knowledgeBaseStack.knowledgeBase, 
+                dataSource: knowledgeBaseStack.dataSource, 
+                allowHeaders, 
+                allowOrigins,
+            },
+            context
+        )
+        lambdaStack.addDependency(knowledgeBaseStack)
+
+
+        const apigwStack = new ApiGwStack(
+            this, 
+            `${appName}-ApiGwStack`, 
+            {
+                enableLocalhost,
+                projectsFunction: lambdaStack.projectsFunction,
+                distribution
+            },
+            context
+        )
+        apigwStack.addDependency(lambdaStack)
 
 
     }
