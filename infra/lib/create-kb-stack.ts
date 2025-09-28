@@ -6,22 +6,101 @@ import { CDKContext } from '../types';
 import { OpenSearchStack } from './open-search-stack';
 
 
-export interface CreateKBStackProps extends cdk.StackProps {
+export interface CreateKBStackProps {
     knowledgeBaseRole: iam.Role;
-}
+} 
 
 
-export class CreateKBStack extends cdk.Stack {
-
+export class CreateKBStack extends Construct {
+    
+    public readonly knowledgeBaseRole: iam.Role;
     public readonly knowledgeBase: bedrock.CfnKnowledgeBase;
     public readonly dataSource: bedrock.CfnDataSource;
 
     constructor(scope: Construct, id: string, props: CreateKBStackProps, context: CDKContext){
 
-        super(scope, id, props);
+        super(scope, id);
         const appName = `${context.appName}-${context.stage}`;
         
         const {knowledgeBaseRole} = props
+
+        /* const knowledgeBaseRole = new iam.Role(this, `KnowledgeBaseRole`, {
+            assumedBy: new iam.ServicePrincipal('bedrock.amazonaws.com'),
+            roleName: cdk.PhysicalName.GENERATE_IF_NEEDED,
+            inlinePolicies: {
+                knowledgeBasePolicy: new iam.PolicyDocument({
+                    statements: [
+                        // Bedrock permissions for knowledge base operations
+                        new iam.PolicyStatement({
+                            effect: iam.Effect.ALLOW,
+                            actions: [
+                                'bedrock:GetKnowledgeBase',
+                                'bedrock:StartIngestionJob',
+                                'bedrock:GetIngestionJob',
+                                'bedrock:ListIngestionJobs',
+                                'bedrock:IngestKnowledgeBaseDocuments',
+                                'bedrock:DeleteKnowledgeBaseDocuments',
+                                'bedrock:Retrieve',
+                                'bedrock:RetrieveAndGenerate'
+                            ],
+                            resources: [
+                                // Specific to the knowledge base being created
+                                `arn:aws:bedrock:${this.region}:${this.account}:knowledge-base/*`
+                            ]
+                        }),
+
+                        // Bedrock model invocation permissions
+                        new iam.PolicyStatement({
+                            effect: iam.Effect.ALLOW,
+                            actions: [
+                                'bedrock:InvokeModel'
+                            ],
+                            resources: [
+                                // Claude models used for embeddings and retrieval
+                                `arn:aws:bedrock:${this.region}::foundation-model/*`
+                            ]
+                        }),
+
+                        // OpenSearch Serverless permissions
+                        new iam.PolicyStatement({
+                            effect: iam.Effect.ALLOW,
+                            actions: [
+                                'aoss:APIAccessAll',
+                                'aoss:BatchGetCollection',
+                                'aoss:CreateCollection',
+                                'aoss:CreateSecurityPolicy',
+                                'aoss:GetAccessPolicy',
+                                'aoss:UpdateAccessPolicy',
+                                'aoss:CreateAccessPolicy',
+                                'aoss:GetSecurityPolicy',
+                                'aoss:UpdateSecurityPolicy'
+                            ],
+                            resources: [
+                                // Specific to collections in this account
+                                `arn:aws:aoss:${this.region}:${this.account}:collection/*`
+                            ]
+                        }),
+
+                        // OpenSearch data access permissions
+                        new iam.PolicyStatement({
+                            effect: iam.Effect.ALLOW,
+                            actions: [
+                                'aoss:ReadDocument',
+                                'aoss:WriteDocument',
+                                'aoss:DeleteDocument',
+                                'aoss:CreateIndex',
+                                'aoss:DeleteIndex',
+                                'aoss:UpdateIndex'
+                            ],
+                            resources: [
+                                // Specific to collections and indexes in this account
+                                `arn:aws:aoss:${this.region}:${this.account}:collection/*`
+                            ]
+                        })
+                    ]
+                })
+            }
+        }); */
 
         // Create the OpenSearch resources using the OpenSearchDirect construct
         const openSearchResources = new OpenSearchStack(
@@ -42,7 +121,7 @@ export class CreateKBStack extends cdk.Stack {
             knowledgeBaseConfiguration: {
                 type: 'VECTOR',
                 vectorKnowledgeBaseConfiguration: {
-                    embeddingModelArn: `arn:aws:bedrock:${cdk.Stack.of(this).region}::foundation-model/amazon.titan-embed-text-v2:0`,
+                    embeddingModelArn: `arn:aws:bedrock:${context.env.region}::foundation-model/amazon.titan-embed-text-v2:0`,
                     embeddingModelConfiguration: {
                         bedrockEmbeddingModelConfiguration: {
                         dimensions: 1024,

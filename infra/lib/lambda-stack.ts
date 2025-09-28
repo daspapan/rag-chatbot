@@ -9,7 +9,7 @@ import { CDKContext } from '../types';
 import * as path from 'path';
 
 
-export interface LambdaStackProps extends cdk.StackProps {
+export interface LambdaStackProps {
     projectsTable: dynamodb.Table
     projectFilesTable: dynamodb.Table
     userFilesBucket: s3.Bucket
@@ -20,13 +20,13 @@ export interface LambdaStackProps extends cdk.StackProps {
 }
 
 
-export class LambdaStack extends cdk.Stack {
+export class LambdaStack extends Construct {
 
     public readonly projectsFunction: lambda.Function;
 
     constructor(scope: Construct, id: string, props: LambdaStackProps, context: CDKContext){
 
-        super(scope, id, props);
+        super(scope, id);
         const appName = `${context.appName}-${context.stage}`;
         // console.log(appName)
 
@@ -105,7 +105,7 @@ export class LambdaStack extends cdk.Stack {
                 ],
                 resources: [
                     // Specific to the knowledge base being created
-                    `arn:aws:bedrock:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:knowledge-base/${knowledgeBase.attrKnowledgeBaseId}`
+                    `arn:aws:bedrock:${context.env.region}:${context.env.account}:knowledge-base/${knowledgeBase.attrKnowledgeBaseId}`
                 ]
             })
         );

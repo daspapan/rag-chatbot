@@ -6,12 +6,12 @@ import { Construct } from 'constructs';
 import { CDKContext } from '../types';
 
 
-export interface OpenSearchStackProps extends cdk.StackProps {
+export interface OpenSearchStackProps {
     knowledgeBaseRole: iam.Role;
 }
 
 
-export class OpenSearchStack extends cdk.Stack {
+export class OpenSearchStack extends Construct {
 
     public readonly vectorCollection: opensearchserverless.CfnCollection;
     public readonly vectorIndex: opensearchserverless.CfnIndex;
@@ -25,7 +25,7 @@ export class OpenSearchStack extends cdk.Stack {
 
     constructor(scope: Construct, id: string, props: OpenSearchStackProps, context: CDKContext){
 
-        super(scope, id, props);
+        super(scope, id);
         const appName = `${context.appName}-${context.stage}`;
         // console.log(appName)
 

@@ -1,0 +1,1 @@
+window.config = {"Region":"us-east-1","API":"https://85s0pocntl.execute-api.us-east-1.amazonaws.com/prod/"};

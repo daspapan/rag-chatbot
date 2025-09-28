@@ -4,14 +4,19 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as path from 'path';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
+
+import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
+
 import { Construct } from 'constructs';
 import { CDKContext } from '../types';
 import { CreateKBStack } from './create-kb-stack';
 import { LambdaStack } from './lambda-stack';
 import { ApiGwStack } from './apigw-stack';
+import { TableStack } from './table-stack';
+import { BucketStack } from './bucket-stack';
+import { CloudFrontStack } from './cloudfront-stack';
+
 
 
 interface KnowledgeBaseStackProps extends cdk.StackProps {
@@ -31,172 +36,46 @@ export class KnowledgeBaseStack extends cdk.Stack {
 
         // const enableLocalhost: = ;
 
+        
+        
 
-        const projectsTable = new dynamodb.Table(this, `${appName}-ProjectsTable`, {
-            partitionKey: {
-                name: 'tenantId',
-                type: dynamodb.AttributeType.STRING
+
+        const tableStack = new TableStack(
+            this,
+            `${appName}-TableStack`,
+            context
+        ) 
+          
+
+        const bucketStack = new BucketStack(
+            this,
+            `${appName}-BucketStack`,
+            context
+        )
+
+
+        const cloudFrontStack = new CloudFrontStack(
+            this,
+            `${appName}-CloudFrontStack`,
+            {
+                websiteBucket: bucketStack.websiteBucket,
+                accessLogsBucket: bucketStack.accessLogsBucket,
             },
-            sortKey: {
-                name: 'id',
-                type: dynamodb.AttributeType.STRING
-            },
-            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-            removalPolicy: cdk.RemovalPolicy.DESTROY, // Only for development
-        });
+            context
+        )
 
-        const projectFilesTable = new dynamodb.Table(this, `${appName}-ProjectFilesTable`, {
-            partitionKey: {
-                name: 'tenantId',
-                type: dynamodb.AttributeType.STRING
-            },
-            sortKey: {
-                name: 'id',
-                type: dynamodb.AttributeType.STRING
-            },
-            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-            removalPolicy: cdk.RemovalPolicy.DESTROY, // Only for development
-        });
-
-        // Add the Global Secondary Index
-        projectFilesTable.addGlobalSecondaryIndex({
-            indexName: 'tenantId-projectId-index',
-            partitionKey: {
-                name: 'tenantId',
-                type: dynamodb.AttributeType.STRING
-            },
-            sortKey: {
-                name: 'projectId',
-                type: dynamodb.AttributeType.STRING
-            }
-        });
-
-        // Create a new table for tracking knowledge base ingested files with TTL
-        const knowledgeBaseFilesTable = new dynamodb.Table(this, `${appName}-KnowledgeBaseFilesTable`, {
-            partitionKey: {
-                name: 'tenantId',
-                type: dynamodb.AttributeType.STRING
-            },
-            sortKey: {
-                name: 'id',
-                type: dynamodb.AttributeType.STRING
-            },
-            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-            removalPolicy: cdk.RemovalPolicy.DESTROY,
-            timeToLiveAttribute: 'ttl', // Enable TTL for automatic document expiration
-            stream: dynamodb.StreamViewType.NEW_AND_OLD_IMAGES, // Enable DynamoDB Streams
-        });
-            
-        // Create a new table for tracking query rate limits with TTL
-        const queryRateLimitTable = new dynamodb.Table(this, `${appName}-QueryRateLimitTable`, {
-            partitionKey: {
-                name: 'tenantId',
-                type: dynamodb.AttributeType.STRING
-            },
-            sortKey: {
-                name: 'timestamp',
-                type: dynamodb.AttributeType.NUMBER
-            },
-            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-            removalPolicy: cdk.RemovalPolicy.DESTROY,
-            timeToLiveAttribute: 'ttl', // Enable TTL for automatic cleanup of old records
-        });
-
-        // Add the Global Secondary Index
-        knowledgeBaseFilesTable.addGlobalSecondaryIndex({
-            indexName: 'tenantId-projectId-index',
-            partitionKey: {
-                name: 'tenantId',
-                type: dynamodb.AttributeType.STRING
-            },
-            sortKey: {
-                name: 'projectId',
-                type: dynamodb.AttributeType.STRING
-            }
-        });
-
-        // Create a new table for storing chat history
-        const chatHistoryTable = new dynamodb.Table(this, `${appName}-ChatHistoryTable`, {
-            partitionKey: {
-                name: 'tenantId',
-                type: dynamodb.AttributeType.STRING
-            },
-            sortKey: {
-                name: 'id',
-                type: dynamodb.AttributeType.STRING
-            },
-            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-            removalPolicy: cdk.RemovalPolicy.DESTROY,
-        });
-
-        // Add the Global Secondary Index
-        chatHistoryTable.addGlobalSecondaryIndex({
-            indexName: 'tenantId-userId-index',
-            partitionKey: {
-                name: 'tenantId',
-                type: dynamodb.AttributeType.STRING
-            },
-            sortKey: {
-                name: 'userId',
-                type: dynamodb.AttributeType.STRING
-            }
-        });
-
-
-
-
-        // Create S3 bucket for CloudFront access logs
-        const accessLogsBucket = new s3.Bucket(this, `${appName}-AccessLogsBucket`, {
-            blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-            autoDeleteObjects: true, // Only for development
-            enforceSSL: true,
-            encryption: s3.BucketEncryption.S3_MANAGED,
-            // CloudFront logging requires ACLs to be enabled
-            objectOwnership: s3.ObjectOwnership.OBJECT_WRITER, // Allow the CloudFront logging service to write logs
-            removalPolicy: cdk.RemovalPolicy.DESTROY, // Only for development
-        });
-
-
-        const userFilesBucket = new s3.Bucket(this, `${appName}-UserFilesBucket`, {
-            blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-            encryption: s3.BucketEncryption.S3_MANAGED,
-            enforceSSL: true,
-            removalPolicy: cdk.RemovalPolicy.DESTROY, // Only for development
-            autoDeleteObjects: true // Only for development
-        });
-
-
-        // Create CloudFront distribution
-        const distribution = new cloudfront.Distribution(this, `${appName}-Distribution`, {
-            defaultBehavior: {
-                origin: origins.S3BucketOrigin.withOriginAccessControl(userFilesBucket),
-                viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
-                cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-            },
-            // Enable access logging for CloudFront distribution (AwsSolutions-CFR3)
-            enableLogging: true,
-            logBucket: accessLogsBucket,
-            logFilePrefix: 'cloudfront-logs/',
-            // Set minimum TLS version to 1.2 (AwsSolutions-CFR4)
-            minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
-            // Explicitly configure certificate to ensure TLS compliance
-            sslSupportMethod: cloudfront.SSLMethod.SNI,
-        });
 
         // Add CORS configuration if needed
-        userFilesBucket.addCorsRule({
+        bucketStack.userFilesBucket.addCorsRule({
             allowedMethods: [s3.HttpMethods.PUT, s3.HttpMethods.GET],
             allowedOrigins: enableLocalhost
-                ? [`https://${distribution.distributionDomainName}`, 'http://localhost:8000']
-                : [`https://${distribution.distributionDomainName}`],
+                ? [`https://${cloudFrontStack.distribution.distributionDomainName}`, 'http://localhost:3000']
+                : [`https://${cloudFrontStack.distribution.distributionDomainName}`],
             allowedHeaders: ['*'],
             maxAge: 3000
         });
+        
 
-
-
-        // Create the knowledge base role with least privilege permissions
         const knowledgeBaseRole = new iam.Role(this, `${appName}-KnowledgeBaseRole`, {
             assumedBy: new iam.ServicePrincipal('bedrock.amazonaws.com'),
             inlinePolicies: {
@@ -217,7 +96,7 @@ export class KnowledgeBaseStack extends cdk.Stack {
                             ],
                             resources: [
                                 // Specific to the knowledge base being created
-                                `arn:aws:bedrock:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:knowledge-base/*`
+                                `arn:aws:bedrock:${this.region}:${this.account}:knowledge-base/*`
                             ]
                         }),
 
@@ -229,7 +108,7 @@ export class KnowledgeBaseStack extends cdk.Stack {
                             ],
                             resources: [
                                 // Claude models used for embeddings and retrieval
-                                `arn:aws:bedrock:${cdk.Stack.of(this).region}::foundation-model/*`
+                                `arn:aws:bedrock:${this.region}::foundation-model/*`
                             ]
                         }),
 
@@ -249,7 +128,7 @@ export class KnowledgeBaseStack extends cdk.Stack {
                             ],
                             resources: [
                                 // Specific to collections in this account
-                                `arn:aws:aoss:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:collection/*`
+                                `arn:aws:aoss:${this.region}:${this.account}:collection/*`
                             ]
                         }),
 
@@ -272,23 +151,23 @@ export class KnowledgeBaseStack extends cdk.Stack {
                     ]
                 })
             }
-        });
+        }); 
+
 
         // Grant S3 read permissions to the knowledge base role
-        userFilesBucket.grantRead(knowledgeBaseRole);
+        bucketStack.userFilesBucket.grantRead(knowledgeBaseRole);
 
-
+        
 
         // Create the OpenSearch and Knowledge Base resources
         const knowledgeBaseStack = new CreateKBStack(
             this, 
             `${appName}-OpenSearchKBStack`, 
             {
-                knowledgeBaseRole: knowledgeBaseRole,
+                knowledgeBaseRole: knowledgeBaseRole
             },
             context
         );
-
         
 
 
@@ -297,8 +176,8 @@ export class KnowledgeBaseStack extends cdk.Stack {
             : 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token';
 
         const allowOrigins = enableLocalhost
-            ? `https://${distribution.distributionDomainName},http://localhost:8000`
-            : `https://${distribution.distributionDomainName}`;
+            ? `https://${cloudFrontStack.distribution.distributionDomainName},http://localhost:3000`
+            : `https://${cloudFrontStack.distribution.distributionDomainName}`;
 
 
         
@@ -306,9 +185,9 @@ export class KnowledgeBaseStack extends cdk.Stack {
             this, 
             `${appName}-LambdaStack`, 
             {
-                projectsTable, 
-                projectFilesTable, 
-                userFilesBucket, 
+                projectsTable: tableStack.projectsTable, 
+                projectFilesTable: tableStack.projectFilesTable, 
+                userFilesBucket: bucketStack.userFilesBucket, 
                 knowledgeBase: knowledgeBaseStack.knowledgeBase, 
                 dataSource: knowledgeBaseStack.dataSource, 
                 allowHeaders, 
@@ -316,7 +195,6 @@ export class KnowledgeBaseStack extends cdk.Stack {
             },
             context
         )
-        lambdaStack.addDependency(knowledgeBaseStack)
 
 
         const apigwStack = new ApiGwStack(
@@ -325,11 +203,57 @@ export class KnowledgeBaseStack extends cdk.Stack {
             {
                 enableLocalhost,
                 projectsFunction: lambdaStack.projectsFunction,
-                distribution
+                distribution: cloudFrontStack.distribution
             },
             context
         )
-        apigwStack.addDependency(lambdaStack)
+        
+
+
+
+        const configContent = JSON.stringify({
+            // UserPoolId: userPool.userPoolId,
+            // IdentityPoolId: identityPool.ref,
+            // ClientId: userPoolClient.userPoolClientId,
+            Region: this.region,
+            // CognitoDomain: domain.baseUrl(),
+            API: apigwStack.api.url,
+            // Tenants: tenants
+        });
+
+        // Deploy static website files to S3
+        new s3deploy.BucketDeployment(this, 'WebsiteDeploymentBucket', {
+            sources: [
+                s3deploy.Source.asset('../ui/.next'),
+                s3deploy.Source.data('config.js', `window.config = ${configContent};`)
+            ],
+            destinationBucket: bucketStack.websiteBucket,
+            memoryLimit: 2048
+        }); 
+
+
+        
+        // Output values
+        // new cdk.CfnOutput(this, `${this.stackName}_UserPoolId`, { value: userPool.userPoolId });
+        // new cdk.CfnOutput(this, `${this.stackName}_UserPoolClientId`, { value: userPoolClient.userPoolClientId });
+        // new cdk.CfnOutput(this, `${this.stackName}_IdentityPoolId`, { value: identityPool.ref });
+        new cdk.CfnOutput(this, `${this.stackName}_DistributionDomainName`, { value: cloudFrontStack.distribution.distributionDomainName });
+        new cdk.CfnOutput(this, `${this.stackName}_DistributionId`, { value: cloudFrontStack.distribution.distributionId });
+        // new cdk.CfnOutput(this, `${this.stackName}_CognitoDomain`, { value: domain.baseUrl() });
+        new cdk.CfnOutput(this, `${this.stackName}_EnableLocalhost`, { value: enableLocalhost.toString() });
+        new cdk.CfnOutput(this, `${this.stackName}_WebsiteBucket`, { value: bucketStack.websiteBucket.bucketName });
+        new cdk.CfnOutput(this, `${this.stackName}_UserFilesBucket`, { value: bucketStack.userFilesBucket.bucketName });
+        new cdk.CfnOutput(this, `${this.stackName}_ProjectsTableName`, { value: tableStack.projectsTable.tableName });
+        new cdk.CfnOutput(this, `${this.stackName}_ProjectFilesTableName`, { value: tableStack.projectFilesTable.tableName });
+        new cdk.CfnOutput(this, `${this.stackName}_KnowledgeBaseFilesTableName`, { value: tableStack.knowledgeBaseFilesTable.tableName });
+        new cdk.CfnOutput(this, `${this.stackName}_ChatHistoryTableName`, { value: tableStack.chatHistoryTable.tableName });
+        new cdk.CfnOutput(this, `${this.stackName}_QueryRateLimitTableName`, { value: tableStack.queryRateLimitTable.tableName });
+        new cdk.CfnOutput(this, `${this.stackName}_ApiUrl`, { value: apigwStack.api.url });
+        new cdk.CfnOutput(this, `${this.stackName}_KnowledgeBaseId`, { value: knowledgeBaseStack.knowledgeBase.attrKnowledgeBaseId });
+        new cdk.CfnOutput(this, `${this.stackName}_KnowledgeBaseDataSourceId`, { value: knowledgeBaseStack.dataSource.attrDataSourceId });
+        new cdk.CfnOutput(this, `${this.stackName}_ConfigDownloadCommand`, { 
+        value: `aws s3 cp s3://${bucketStack.websiteBucket.bucketName}/config.js ./ui/config.js --region ${this.region}` 
+        });
 
 
     }

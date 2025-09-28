@@ -1,28 +1,25 @@
 import * as cdk from 'aws-cdk-lib';
-import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as apigw from 'aws-cdk-lib/aws-apigateway';
 import * as lambda from 'aws-cdk-lib/aws-lambda'
-import * as bedrock from 'aws-cdk-lib/aws-bedrock';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import { Construct } from 'constructs';
 import { CDKContext } from '../types';
-import * as path from 'path';
 
 
-export interface ApiGwStackProps extends cdk.StackProps {
+export interface ApiGwStackProps {
     enableLocalhost: boolean
     projectsFunction: lambda.Function;
     distribution: cloudfront.Distribution
 }
 
 
-export class ApiGwStack extends cdk.Stack {
+export class ApiGwStack extends Construct {
 
-    // public readonly projectsFunction: lambda.Function;
+    public readonly api: apigw.RestApi;
 
     constructor(scope: Construct, id: string, props: ApiGwStackProps, context: CDKContext){
 
-        super(scope, id, props);
+        super(scope, id);
         const appName = `${context.appName}-${context.stage}`;
         // console.log(appName)
 
@@ -33,12 +30,12 @@ export class ApiGwStack extends cdk.Stack {
         } = props
 
 
-        const api = new apigw.RestApi(this, `${appName}-Api`, {
+        this.api = new apigw.RestApi(this, `${appName}-Api`, {
             defaultCorsPreflightOptions: {
                 allowOrigins: enableLocalhost
                 ? [
                     `https://${distribution.distributionDomainName}`,
-                    'http://localhost:8000'
+                    'http://localhost:3000'
                 ]
                 : [`https://${distribution.distributionDomainName}`],
                 allowMethods: ['GET', 'OPTIONS', 'POST', 'PUT', 'DELETE'],
@@ -53,7 +50,7 @@ export class ApiGwStack extends cdk.Stack {
             }
         });
 
-        const projectsAPI = api.root.addResource('projects');
+        const projectsAPI = this.api.root.addResource('projects');
 
         // GET /projects (list all)
         projectsAPI.addMethod('GET', new apigw.LambdaIntegration(projectsFunction));
