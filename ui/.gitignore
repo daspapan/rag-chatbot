@@ -2,7 +2,6 @@
 
 # dependencies
 /node_modules
-/dist
 /.pnp
 .pnp.*
 .yarn/*
@@ -40,7 +39,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-server
-*.bak
-cdk-outputs.json
-cdk.context.json

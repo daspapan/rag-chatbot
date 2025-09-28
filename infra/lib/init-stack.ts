@@ -187,6 +187,9 @@ export class KnowledgeBaseStack extends cdk.Stack {
             {
                 projectsTable: tableStack.projectsTable, 
                 projectFilesTable: tableStack.projectFilesTable, 
+                chatHistoryTable: tableStack.chatHistoryTable,
+                queryRateLimitTable: tableStack.queryRateLimitTable,
+                knowledgeBaseFilesTable: tableStack.knowledgeBaseFilesTable,
                 userFilesBucket: bucketStack.userFilesBucket, 
                 knowledgeBase: knowledgeBaseStack.knowledgeBase, 
                 dataSource: knowledgeBaseStack.dataSource, 
@@ -202,7 +205,10 @@ export class KnowledgeBaseStack extends cdk.Stack {
             `${appName}-ApiGwStack`, 
             {
                 enableLocalhost,
+                projectFilesFunction: lambdaStack.projectFilesFunction,
                 projectsFunction: lambdaStack.projectsFunction,
+                queryKnowledgeBaseFunction: lambdaStack.queryKnowledgeBaseFunction,
+                checkKnowledgeBaseStatusFunction: lambdaStack.checkKnowledgeBaseStatusFunction,
                 distribution: cloudFrontStack.distribution
             },
             context

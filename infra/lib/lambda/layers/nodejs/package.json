@@ -10,12 +10,9 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@aws-sdk/client-s3vectors": "^3.862.0",
-    "dynamodb-toolbox": "^2.7.1",
-    "lambda-multipart-parser": "^1.0.1",
-    "pg": "^8.16.3",
-    "uuid": "^11.1.0",
-    "zod": "^4.1.8"
+    "@aws-sdk/client-dynamodb": "^3.896.0",
+    "@aws-sdk/lib-dynamodb": "^3.896.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/pg": "^8.15.5",

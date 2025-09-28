@@ -1,7 +1,7 @@
 {
-  "name": "projects-handler",
+  "name": "cleanup-kb-handler",
   "version": "1.0.0",
-  "description": "Lambda for S3 Vector to store files from S3 Bucket.",
+  "description": "Lambda function to handle TTL-expired documents.",
   "main": "dist/index.js",
   "scripts": {
     "build": "esbuild src/index.ts --bundle --minify --external:@aws-sdk/* --platform=node --target=es2020 --outdir=dist",
@@ -9,14 +9,11 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.896.0",
-    "@aws-sdk/lib-dynamodb": "^3.896.0",
-    "aws-sdk": "^2.1692.0",
-    "uuid": "^11.1.0"
+    "aws-sdk": "^2.1692.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.138",
     "@types/node": "^20.14.9",
-    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.43.0",
     "@typescript-eslint/parser": "^8.43.0",
     "esbuild": "^0.25.9",

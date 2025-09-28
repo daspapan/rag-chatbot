@@ -11,8 +11,12 @@
     "cdk": "cdk",
     "bootstrap": "cdk bootstrap",
     "synth": "cdk synth",
+    "lambda-build-check-kb": "cd lib/lambda/check-kb-status-handler && npm install && npm run build",
+    "lambda-build-cleanup-kb": "cd lib/lambda/cleanup-kb-handler && npm install && npm run build",
+    "lambda-build-query-kb": "cd lib/lambda/query-kb-handler && npm install && npm run build",
+    "lambda-build-project-files": "cd lib/lambda/project-files-handler && npm install && npm run build",
     "lambda-build-projects": "cd lib/lambda/projects-handler && npm install && npm run build",
-    "lambda-build": "npm run lambda-build-projects",
+    "lambda-build": "npm run lambda-build-projects && npm run lambda-build-project-files && npm run lambda-build-query-kb && npm run lambda-build-cleanup-kb && npm run lambda-build-check-kb",
     "deploy": "npm run lambda-build && cdk synth && cdk deploy --require-approval never --all --outputs-file ../cdk-outputs.json",
     "destroy": "cdk destroy --require-approval never --all"
   },
@@ -30,5 +34,14 @@
     "aws-cdk-lib": "2.213.0",
     "constructs": "^10.0.0",
     "git-branch": "^2.0.1"
-  }
+  },
+  "description": "This is a blank project for CDK development with TypeScript.",
+  "main": "jest.config.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

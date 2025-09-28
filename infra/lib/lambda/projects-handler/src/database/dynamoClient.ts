@@ -6,6 +6,7 @@ export interface projectItem {
     userId: string
     tenantId: string
     createdAt: number
+    projectId?: string
 }
 
 const client = new DynamoDBClient({})

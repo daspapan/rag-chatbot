@@ -2,6 +2,7 @@
 import { projectItem } from '../database/dynamoClient'
 import { ProjectRepo } from '../repository/projectRepo'
 // import { FileRepo } from '../repository/fileRepo'
+// import { PROJECT_FILES_TABLE } from '../constants'
 
 // const s3 = new S3Client({})
 const projectRepo = new ProjectRepo()
@@ -27,7 +28,7 @@ export class ProjectService {
         await fileRepo.deleteFiles(files)
 
         // Delete S3 folder
-        await this.deleteS3Folder(process.env.USER_FILES_BUCKET!, `${tenantId}/${projectId}/`)
+        await this.deleteS3Folder(PROJECT_FILES_TABLE!, `${tenantId}/${projectId}/`)
 
         // Delete project
         await projectRepo.deleteProject(tenantId, projectId);
@@ -44,5 +45,5 @@ export class ProjectService {
                 Quiet: true,
             },
         }))
-    } */
+    }  */
 }
