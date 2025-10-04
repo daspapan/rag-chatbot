@@ -1,9 +1,21 @@
 // src/utils/common.ts
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+import { BatchWriteItemCommand, DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { S3Client } from '@aws-sdk/client-s3'
+import { BedrockAgentClient } from '@aws-sdk/client-bedrock-agent'
+import { BedrockAgentRuntimeClient } from '@aws-sdk/client-bedrock-agent-runtime'
 import * as AWS from 'aws-sdk'
-import { ALLOW_HEADERS } from '../constants'
+import { ALLOW_HEADERS, PROJECT_FILES_TABLE } from '../constants'
+import { ProjectFile } from '../models/ProjectFilesModel'
+import { BatchWriteCommandInput, QueryCommand } from '@aws-sdk/lib-dynamodb'
 
-
+// Initialize AWS clients
+const dynamodb = new DynamoDBClient()
+const s3 = new S3Client()
+const bedrockAgent = new BedrockAgentClient()
+const bedrockAgentRuntime = new BedrockAgentRuntimeClient()
+// const ddbClient = new DynamoDBClient({})
+// const ddbDocClient = DynamoDBDocumentClient.from(ddbClient)
 
 // ---- JSON Encoder ----
 /* export function decimalEncoder(obj: unknown): unknown {
@@ -62,13 +74,32 @@ export function handleOptionsRequest(
 }
 
 // ---- Extract User Claims (Cognito) ----
-/* export function getUserTenantFromClaims(event: APIGatewayProxyEvent): { userId: string; tenantId: string; } {
+export function getUserTenantFromClaims(event: APIGatewayProxyEvent): { userId: string; tenantId: string; } {
+    console.log(`${event.requestContext}`)
+    return {
+        userId: 'user1',
+        tenantId: 'tenant1'
+    }
+    /* 
     const claims: unknown = (event.requestContext as unknown)?.authorizer?.claims || {}
     return {
         userId: claims['sub'],
         tenantId: claims['custom:tenantId'],
+    } 
+
+    ------------------------------
+        
+    const userId = event.requestContext.authorizer?.claims?.['cognito:username'] || '';
+    const tenantId = event.requestContext.authorizer?.claims?.['custom:tenantId'] || '';
+
+    if (!userId || !tenantId) {
+        throw new Error('User ID or Tenant ID missing from claims.');
     }
-} */
+
+    return { userId, tenantId };
+
+    */
+}
 
 // ---- DynamoDB Queries ----
 /* export async function queryItemsByTenantProject(
@@ -88,25 +119,28 @@ export function handleOptionsRequest(
 
     const response = await dynamodb.query(params).promise()
     return response.Items || []
-}
+}*/
 
 export async function getFileIds(
-    projectFilesTable: string,
     tenantId: string,
     projectId: string
 ): Promise<string[]> {
-    const params = {
-        TableName: projectFilesTable,
+
+    const command = new QueryCommand({
+        TableName: PROJECT_FILES_TABLE || '',
         IndexName: 'tenantId-projectId-index',
         KeyConditionExpression: 'tenantId = :tenantId AND projectId = :projectId',
-        ExpressionAttributeValues: {
+        ExpressionAttributeNames: {
             ':tenantId': tenantId,
             ':projectId': projectId,
         },
-    }
+    })
 
-    const response = await dynamodb.query(params).promise()
-    return (response.Items || []).map((item: any) => item.id)
+    const response = await dynamodb.send(command)
+    const items = (response.Items || []) as ProjectFile[]
+    logger.info(`Found ${items.length} project files for project ID: ${projectId}`)
+    return items.map((item: ProjectFile) => item.id)
+
 }
 
 // ---- Batch Delete ----
@@ -115,6 +149,43 @@ export async function batchDeleteItems(
     items: Array<{ tenantId: string; id: string; }>
 ): Promise<boolean> {
     try {
+        if (items.length === 0) {
+            return true
+        }
+
+        /* 
+        
+        // DynamoDB BatchWriteItem limit is 25 items per request
+        const BATCH_SIZE = 25;
+        let successful = true;
+
+        for (let i = 0; i < items.length; i += BATCH_SIZE) {
+            const batch = items.slice(i, i + BATCH_SIZE);
+            
+            const deleteRequests = batch.map(item => ({
+                DeleteRequest: {
+                    ...
+                }
+            }));
+
+            const params: BatchWriteCommandInput = {
+                RequestItems: {
+                    [tableName]: deleteRequests,
+                }
+            };
+
+            try {
+                const command = new BatchWriteCommand(params);
+                await ddbDocClient.send(command);
+                // Handling UnprocessedItems logic is omitted for simplification but required in production
+            } catch (e) {
+                logger.exception(`Error in batch delete for table ${tableName}:`, e);
+                successful = false;
+            }
+        }
+        return successful;
+        */
+        
         const writeRequests = items.map((item) => ({
             DeleteRequest: {
                 Key: {
@@ -124,14 +195,23 @@ export async function batchDeleteItems(
             },
         }))
 
-        const params = { RequestItems: { [tableName]: writeRequests } }
-        await dynamodb.batchWrite(params).promise()
+        const params: BatchWriteCommandInput = { 
+            RequestItems: { 
+                [tableName]: writeRequests 
+            } 
+        }
+        // await dynamodb.batchWrite(params).promise()
+        const command = new BatchWriteItemCommand(params)
+        const response = await dynamodb.send(command)
+        console.log('Batch delete successful:', response)
         return true
+
+        
     } catch (err) {
         console.warn('Batch delete error:', err)
         return false
     }
-} */
+} 
 
 // ---- Error Handlers ----
 export function handleClientError(e: AWS.AWSError, event: APIGatewayProxyEvent) {
@@ -150,4 +230,16 @@ export function handleGeneralException(
 }
 
 // ---- Export AWS Clients ----
-// export { dynamodb, s3, bedrockAgent, bedrockAgentRuntime }
+export { dynamodb, s3, bedrockAgent, bedrockAgentRuntime }
+
+
+
+// Simple logging utility (equivalent to logger from powertools)
+// In a real project, consider using a dedicated library like PINO or a Powertools equivalent for TS
+export const logger = {
+    info: (message: string | object) => console.log(`INFO: ${message}`),
+    warn: (message: string | object) => console.warn(`WARN: ${message}`),
+    error: (message: string | object) => console.error(`ERROR: ${message}`),
+    exception: (message: string | object, error: AWS.AWSError | unknown) => console.error(`EXCEPTION: ${message}`, error),
+    debug: (message: string | object) => console.log('DEBUG:', message),
+}

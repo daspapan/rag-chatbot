@@ -8,7 +8,11 @@
     "lint": "eslint ./src/* --ext .ts --fix"
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-agent": "^3.901.0",
+    "@aws-sdk/client-bedrock-agent-runtime": "^3.901.0",
     "@aws-sdk/client-dynamodb": "^3.896.0",
+    "@aws-sdk/client-s3": "^3.901.0",
+    "@aws-sdk/lib-dynamodb": "^3.901.0",
     "aws-sdk": "^2.1692.0"
   },
   "devDependencies": {

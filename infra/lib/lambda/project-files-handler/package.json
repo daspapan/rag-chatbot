@@ -8,8 +8,16 @@
     "lint": "eslint ./src/* --ext .ts --fix"
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-agent": "^3.899.0",
+    "@aws-sdk/client-bedrock-agent-runtime": "^3.899.0",
     "@aws-sdk/client-dynamodb": "^3.896.0",
-    "aws-sdk": "^2.1692.0"
+    "@aws-sdk/client-s3": "^3.896.0",
+    "@aws-sdk/lib-dynamodb": "^3.899.0",
+    "@aws-sdk/s3-request-presigner": "^3.899.0",
+    "aws-sdk": "^2.1692.0",
+    "dynamodb-toolbox": "^2.7.1",
+    "uuid": "^13.0.0",
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.138",

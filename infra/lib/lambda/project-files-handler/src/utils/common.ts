@@ -1,9 +1,17 @@
 // src/utils/common.ts
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { S3Client } from '@aws-sdk/client-s3'
+import { BedrockAgentClient } from '@aws-sdk/client-bedrock-agent'
+import { BedrockAgentRuntimeClient } from '@aws-sdk/client-bedrock-agent-runtime'
 import * as AWS from 'aws-sdk'
 import { ALLOW_HEADERS } from '../constants'
 
-
+// Initialize AWS clients
+const dynamodb = new DynamoDBClient()
+const s3 = new S3Client()
+const bedrockAgent = new BedrockAgentClient()
+const bedrockAgentRuntime = new BedrockAgentRuntimeClient()
 
 // ---- JSON Encoder ----
 /* export function decimalEncoder(obj: unknown): unknown {
@@ -62,13 +70,32 @@ export function handleOptionsRequest(
 }
 
 // ---- Extract User Claims (Cognito) ----
-/* export function getUserTenantFromClaims(event: APIGatewayProxyEvent): { userId: string; tenantId: string; } {
+export function getUserTenantFromClaims(event: APIGatewayProxyEvent): { userId: string; tenantId: string; } {
+    console.log(`${event.requestContext}`)
+    return {
+        userId: 'user1',
+        tenantId: 'tenant1'
+    }
+    /* 
     const claims: unknown = (event.requestContext as unknown)?.authorizer?.claims || {}
     return {
         userId: claims['sub'],
         tenantId: claims['custom:tenantId'],
+    } 
+
+    ------------------------------
+        
+    const userId = event.requestContext.authorizer?.claims?.['cognito:username'] || '';
+    const tenantId = event.requestContext.authorizer?.claims?.['custom:tenantId'] || '';
+
+    if (!userId || !tenantId) {
+        throw new Error('User ID or Tenant ID missing from claims.');
     }
-} */
+
+    return { userId, tenantId };
+
+    */
+}
 
 // ---- DynamoDB Queries ----
 /* export async function queryItemsByTenantProject(
@@ -150,4 +177,15 @@ export function handleGeneralException(
 }
 
 // ---- Export AWS Clients ----
-// export { dynamodb, s3, bedrockAgent, bedrockAgentRuntime }
+export { dynamodb, s3, bedrockAgent, bedrockAgentRuntime }
+
+
+
+// Simple logging utility (equivalent to logger from powertools)
+// In a real project, consider using a dedicated library like PINO or a Powertools equivalent for TS
+export const logger = {
+    info: (message: string) => console.log(`INFO: ${message}`),
+    warn: (message: string) => console.warn(`WARN: ${message}`),
+    error: (message: string) => console.error(`ERROR: ${message}`),
+    exception: (message: string, error: AWS.AWSError | unknown) => console.error(`EXCEPTION: ${message}`, error),
+}

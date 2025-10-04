@@ -74,6 +74,10 @@ export class LambdaStack extends Construct {
         })
 
         
+        /* ********************* * 
+        *    PROJECTS HANDLER.   *
+        ************************ */
+
         
         this.projectsFunction = new lambda.Function(
             this, 
@@ -126,7 +130,9 @@ export class LambdaStack extends Construct {
 
 
 
-
+        /* ************************** * 
+        *    PROJECT FILES HANDLER.   *
+        ***************************** */
 
        
         
@@ -169,6 +175,12 @@ export class LambdaStack extends Construct {
                 `arn:aws:bedrock:${context.env.region}:${context.env.account}:knowledge-base/${knowledgeBase.attrKnowledgeBaseId}`
             ]
         }));
+
+
+
+        /* ********************************* * 
+        *    QUERY KNOWLEDGE BASE HANDLER.   *
+        ************************************ */
 
 
      
@@ -229,6 +241,9 @@ export class LambdaStack extends Construct {
 
 
 
+        /* **************************************** * 
+        *    CHECK KNOWLEDGE BASE STATUS HANDLER.   *
+        ******************************************* */
 
 
 
@@ -276,6 +291,11 @@ export class LambdaStack extends Construct {
         }));
 
 
+        
+
+        /* *********************************** * 
+        *    CLEANUP KNOWLEDGE BASE HANDLER.   *
+        ************************************** */
 
     
         // Create a Lambda function to handle TTL-expired documents
@@ -290,6 +310,9 @@ export class LambdaStack extends Construct {
                 KNOWLEDGE_BASE_ID: knowledgeBase.attrKnowledgeBaseId,
                 DATA_SOURCE_ID: dataSource.attrDataSourceId,
                 KNOWLEDGE_BASE_FILES_TABLE: knowledgeBaseFilesTable.tableName,
+                PROJECT_FILES_TABLE: projectFilesTable.tableName,
+                ALLOW_ORIGINS: allowOrigins,
+                ALLOW_HEADERS: allowHeaders,
                 // Add PowerTools environment variables
                 ...powertoolsEnv
             },
