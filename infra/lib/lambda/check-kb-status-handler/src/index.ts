@@ -1,6 +1,12 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-
-import { createResponse, getUserTenantFromClaims, handleClientError, handleGeneralException, handleOptionsRequest, logger } from './utils/common'
+import { 
+    createResponse, 
+    getUserTenantFromClaims, 
+    handleClientError, 
+    handleGeneralException, 
+    handleOptionsRequest, 
+    logger 
+} from './utils/common'
 import { KNOWLEDGE_BASE_ID } from './constants'
 import { getProjectFiles, ingestFiles } from './services/KnowledgeBase'
 

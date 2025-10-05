@@ -14,8 +14,8 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
         const id = uuidv4()
         const method = event.httpMethod
-        const tenantId = '1' // extract from claims in real app
-        const userId = id // `demo-user-${id}`
+        const tenantId = 'tenant1' // extract from claims in real app
+        const userId = 'user1' // `demo-user-${id}`
         const createdAt = Date.now() as number
 
         if (method === 'GET') {
@@ -41,13 +41,13 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
             return createResponse(event, 201, created)
         }
 
-        /* if (method === 'DELETE') {
+        if (method === 'DELETE') {
             if (!event.pathParameters?.id) {
                 return createResponse(event, 400, { message: 'Project ID required', error: 'Project ID required' })
             }
-            await service.deleteProject(tenantId, event.pathParameters.id)
+            // await service.deleteProject(tenantId, event.pathParameters.id)
             return createResponse(event, 204, { message: 'No Content'})
-        } */
+        }
 
         return createResponse(event, 404, { message: 'Method Not Found' })
         

@@ -30,7 +30,8 @@ export const handler = async (
             return createResponse(event, 400, { error: 'Unsupported method' })
         }
         
-    } catch (e: unknown ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any ) {
         // ClientError and general Exception handling combined for simplicity in porting
         logger.exception('ProjectFilesError: Unexpected error processing request.', e)
         // metrics.addMetric('GeneralError', 'Count', 1)
