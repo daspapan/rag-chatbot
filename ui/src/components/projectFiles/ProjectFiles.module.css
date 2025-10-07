@@ -1,0 +1,362 @@
+.project_details_container {
+    padding: 20px;
+}
+
+.project_details_main {
+    margin: 0 auto;
+}
+
+.breadcrumb {
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.breadcrumb a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.project_header {
+    margin-bottom: 5px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.project_header h3 {
+    text-align: left;
+    margin-bottom: 10px; /* Add some spacing between the header and meta items */
+    margin-left: 12px; /* Add some spacing between the header and meta items */
+}
+
+.project_meta {
+    display: flex;
+    margin-top: 15px;
+}
+
+.project_meta_item {
+    flex: 1;
+    padding: 0 15px;
+    position: relative;
+}
+
+.project_meta_item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 1px;
+    background-color: #ddd;
+}
+
+.project_info {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+    color: #666;
+    font-size: 0.9em;
+    text-transform: uppercase;
+}
+
+.project_value {
+    font-size: 0.8em;
+}
+
+.files_section {
+    margin-top: 0px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+.files_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.actions button img {
+    width: 20px;
+    height: 20px;
+}
+
+.progress_bar_container {
+    width: 100%;
+    height: 5px;
+    background-color: #eee;
+    border-radius: 3px;
+    margin-bottom: 15px;
+}
+
+.progress_bar {
+    height: 100%;
+    background-color: #4caf50;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.file_actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn_primary {
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn_primary:hover {
+    background-color: #0055aa;
+}
+
+.btn_primary_delete {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn_primary_delete:hover {
+    background-color: #d32f2f;
+}
+
+.search_container {
+    margin-top: 5px 0;
+    margin-bottom: 0px 0;
+    width: 40%;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.search_container input {
+    width: 100%;
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.search_container input:focus {
+    outline: none;
+    border-color: #0066cc;
+    box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal_content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 80%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.btn_cancel {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn_cancel:hover {
+    background-color: #e0e0e0;
+}
+
+/* Add styles for checkboxes */
+input[type="checkbox"] {
+    cursor: pointer;
+    width: 14px;
+    height: 14px;
+}
+
+/* Style for the action dropdown */
+.MuiSelect_select {
+    padding: 8px 12px !important;
+}
+
+/* Custom styles for the tables */
+.MuiPaper_root {
+    border: 0px solid #ddd !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    padding: 0px;
+}
+
+.MuiTableHead_root th {
+    background-color: #ffffff !important;
+    font-weight: bold !important;
+    border-bottom: 0px solid #ddd !important;
+    border-top: 0px solid #ddd !important;
+    color: #333 !important;
+    padding: 1px 16px !important;
+    height: 0px !important;
+    border-right: none !important;
+}
+
+.MuiTableCell_root {
+    border-bottom: 1px solid #ddd !important;
+    border-right: none !important;
+    padding: 2px 16px !important;
+    height: 26px !important;
+    font-size: 0.875rem !important;
+}
+
+.MuiTableRow_root {
+    height: 36px !important;
+}
+
+.MuiTableRow_root {
+    background-color: #ffffff;
+}
+
+.MuiTableRow_root:nth-of-type(even) {
+    background-color: #ffffff;
+}
+
+
+.MuiTableRow_root:last-child .MuiTableCell_root {
+    border-bottom: 1px solid #ddd !important;
+}
+
+.MuiTableSortLabel_root {
+    font-weight: bold !important;
+    color: #333 !important;
+}
+
+.MuiTableSortLabel_root .MuiTableSortLabel_icon {
+    color: black !important;
+}
+
+.MuiTableCell_root .MuiTableSortLabel_root .MuiTableSortLabel_icon {
+    color: black !important;
+}
+
+.required_indicator {
+    color: #d32f2f;
+    margin-left: 3px;
+}
+
+.no_files_selected_warning {
+    margin-top: 10px;
+    padding: 8px;
+    background-color: #fff3e0;
+    border-left: 4px solid #ff9800;
+    color: #e65100;
+    font-size: 0.9em;
+}
+/* Failed status tooltip styles */
+.failed_status {
+    border-bottom: 1px dotted #ff0000;
+    position: relative;
+    cursor: help;
+}
+
+.failed_status_tooltip {
+    visibility: hidden;
+    position: fixed;
+    background-color: #f9f9f9;
+    color: #333;
+    padding: 8px 12px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    white-space: normal;
+    width: 300px;
+    z-index: 9999;
+    font-size: 12px;
+    text-align: left;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+/* For first row tooltips - special positioning */
+tr:first-child .files_tooltip {
+  /* These styles are now handled dynamically in the component */
+}
+.failed_status:hover .failed_status_tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+.btn_primary:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.btn_primary:disabled:hover {
+    background-color: #cccccc;
+}
+
+.download_button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 8px;
+    padding: 2px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.download_button:hover {
+    opacity: 1;
+}
+
+.download_button svg {
+    vertical-align: middle;
+}
+
+/* Refresh button animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.refresh_spinning {
+    animation: spin 1s linear infinite;
+}
+
+/* Refresh button hover effect */
+button:not(:disabled) img[alt="Refresh"]:hover {
+    transform: rotate(90deg);
+    transition: transform 0.3s ease;
+}
+
+/* Transition for the refresh icon */
+button img[alt="Refresh"] {
+    transition: transform 0.3s ease;
+}

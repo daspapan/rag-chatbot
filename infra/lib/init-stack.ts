@@ -16,6 +16,7 @@ import { ApiGwStack } from './apigw-stack';
 import { TableStack } from './table-stack';
 import { BucketStack } from './bucket-stack';
 import { CloudFrontStack } from './cloudfront-stack';
+import { tenants } from './tenants-config';
 
 
 
@@ -224,7 +225,7 @@ export class KnowledgeBaseStack extends cdk.Stack {
             Region: this.region,
             // CognitoDomain: domain.baseUrl(),
             API: apigwStack.api.url,
-            // Tenants: tenants
+            Tenants: tenants
         });
 
         // Deploy static website files to S3

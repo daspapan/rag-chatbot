@@ -260,32 +260,32 @@ export class OpenSearchStack extends Construct {
             collectionEndpoint: this.vectorCollection.attrCollectionEndpoint,
             mappings: {
                 properties: {
-                vector_field: {
-                    type: 'knn_vector',
-                    dimension: 1024,
-                    method: {
-                    engine: 'faiss',
-                    name: 'hnsw',
-                    spaceType: 'l2',
-                    parameters: {
-                        efConstruction: 128,
-                        m: 16
+                    vector_field: {
+                        type: 'knn_vector',
+                        dimension: 1024,
+                        method: {
+                            engine: 'faiss',
+                            name: 'hnsw',
+                            spaceType: 'l2',
+                            parameters: {
+                                efConstruction: 128,
+                                m: 16
+                            }
+                        }
+                    },
+                    text_field: {
+                        type: 'text',
+                        index: true
+                    },
+                    metadata_field: {
+                        type: 'text',
+                        index: false
                     }
-                    }
-                },
-                text_field: {
-                    type: 'text',
-                    index: true
-                },
-                metadata_field: {
-                    type: 'text',
-                    index: false
-                }
                 }
             },
             settings: {
                 index: {
-                knn: true
+                    knn: true
                 }
             }
         });
@@ -302,7 +302,7 @@ export class OpenSearchStack extends Construct {
                 service: 'CloudFormation',
                 action: 'describeStacks',
                 parameters: {
-                StackName: cdk.Stack.of(this).stackName
+                    StackName: cdk.Stack.of(this).stackName
                 },
                 physicalResourceId: cr.PhysicalResourceId.of(`${this.indexName}-status-check`),
             },
@@ -310,14 +310,14 @@ export class OpenSearchStack extends Construct {
                 service: 'CloudFormation',
                 action: 'describeStacks',
                 parameters: {
-                StackName: cdk.Stack.of(this).stackName
+                    StackName: cdk.Stack.of(this).stackName
                 },
                 physicalResourceId: cr.PhysicalResourceId.of(`${this.indexName}-status-check-update`),
             },
             policy: cr.AwsCustomResourcePolicy.fromStatements([
                 new iam.PolicyStatement({
-                actions: ['cloudformation:DescribeStacks'],
-                resources: ['*']
+                    actions: ['cloudformation:DescribeStacks'],
+                    resources: ['*']
                 })
             ]),
             installLatestAwsSdk: true,

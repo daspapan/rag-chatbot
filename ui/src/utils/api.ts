@@ -4,7 +4,7 @@
  */
 
 import { HTTP_ENDPOINT } from "@/constants";
-import { FileMetadata, Project, ProjectData, ProjectFile, QueryData, QueryResult, StatusData, StatusResponse, UploadResponse } from "@/types";
+import { FileDownloadUrl, FileMetadata, Project, ProjectData, ProjectFile, QueryData, QueryResult, Response, StatusData, StatusResponse, UploadResponse } from "@/types";
 
 class ApiClient {
 
@@ -116,7 +116,7 @@ class ApiClient {
      * Get all projects for the current user
      * @returns {Promise<Array>} List of projects
      */
-    async getProjects() {
+    async getProjects(): Promise<Project[]> {
         return this._apiRequest('/projects', 'GET');
     }
 
@@ -125,7 +125,7 @@ class ApiClient {
      * @param {string} projectId - Project ID
      * @returns {Promise<Object>} Project data
      */
-    async getProject(projectId: string) {
+    async getProject(projectId: string): Promise<Project> {
         return this._apiRequest(`/projects/${projectId}`, 'GET');
     }
 
@@ -143,7 +143,7 @@ class ApiClient {
      * @param {string} projectId - Project ID
      * @returns {Promise<Object>} Response data
      */
-    async deleteProject(projectId: string) {
+    async deleteProject(projectId: string): Promise<void> {
         return this._apiRequest(`/projects/${projectId}`, 'DELETE');
     }
 
@@ -221,7 +221,7 @@ class ApiClient {
      * @param {string} fileId - File ID
      * @returns {Promise<Object>} Object containing download URL
      */
-    async getFileDownloadUrl(projectId: string, fileId: string) {
+    async getFileDownloadUrl(projectId: string, fileId: string): Promise<FileDownloadUrl> {
         return this._apiRequest(`/project-files/${projectId}/download/${fileId}`, 'GET');
     }
 

@@ -35,8 +35,9 @@ export default function RootLayout({
 
           {children}
 
-          <footer className="footer">
-            <p>Welcome to the sample</p>
+          <footer className="mt-4 justify-center align-middle gap-2">
+            <hr/>
+            <p>Demo: Knowledge Base implementation using Amazon Bedrock and Amazon OpenSearch Serverless</p>
           </footer>
 
         </ToastProvider>

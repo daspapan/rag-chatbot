@@ -1,13 +1,13 @@
 // src/utils/common.ts
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { BatchWriteItemCommand, DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { BatchWriteCommandInput, QueryCommand } from '@aws-sdk/lib-dynamodb'
 import { S3Client } from '@aws-sdk/client-s3'
 import { BedrockAgentClient } from '@aws-sdk/client-bedrock-agent'
 import { BedrockAgentRuntimeClient } from '@aws-sdk/client-bedrock-agent-runtime'
 import * as AWS from 'aws-sdk'
 import { ALLOW_HEADERS, PROJECT_FILES_TABLE } from '../constants'
 import { ProjectFile } from '../models/ProjectFilesModel'
-import { BatchWriteCommandInput, QueryCommand } from '@aws-sdk/lib-dynamodb'
 
 // Initialize AWS clients
 const dynamodb = new DynamoDBClient()
@@ -125,18 +125,19 @@ export async function getFileIds(
     tenantId: string,
     projectId: string
 ): Promise<string[]> {
-
+    logger.info(`[getFileIds] - ${tenantId} - ${projectId}`)
     const command = new QueryCommand({
         TableName: PROJECT_FILES_TABLE || '',
         IndexName: 'tenantId-projectId-index',
         KeyConditionExpression: 'tenantId = :tenantId AND projectId = :projectId',
-        ExpressionAttributeNames: {
+        ExpressionAttributeValues: {
             ':tenantId': tenantId,
             ':projectId': projectId,
-        },
+        }, 
     })
-
+    logger.info(`[getFileIds-command] ${JSON.stringify(command, null, 2)}`)
     const response = await dynamodb.send(command)
+    logger.info(`[getFileIds-response] ${JSON.stringify(response, null, 2)}`)
     const items = (response.Items || []) as ProjectFile[]
     logger.info(`Found ${items.length} project files for project ID: ${projectId}`)
     return items.map((item: ProjectFile) => item.id)

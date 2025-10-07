@@ -44,6 +44,11 @@ export class TableStack extends Construct {
             removalPolicy: cdk.RemovalPolicy.DESTROY, // Only for development
         });
 
+
+        /* ***************************** */
+        /*      Project Files Tables.    */
+        /* ***************************** */
+
         this.projectFilesTable = new dynamodb.Table(this, `${appName}-ProjectFilesTable`, {
             partitionKey: {
                 name: 'tenantId',
